@@ -45,11 +45,15 @@ async def save_context_name(message: Message, state: FSMContext):
     user_dir = os.path.join(BASE_STORAGE_DIR, str(user_id))
     context_path = os.path.join(user_dir, context_name)
 
+    storage_path = os.path.join(context_path, "storage")
+    documents_path = os.path.join(context_path, "documents")
+
     if os.path.exists(context_path):
         await message.answer("Контекст с таким названием уже существует. Попробуйте другое.")
         return
 
-    os.makedirs(context_path)
+    os.makedirs(storage_path)
+    os.makedirs(documents_path)
     await state.clear()
 
     await message.answer(f"Контекст '{context_name}' создан!", reply_markup=main_menu)

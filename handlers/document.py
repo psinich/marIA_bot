@@ -64,13 +64,13 @@ async def save_uploaded_document(message: Message, state: FSMContext):
         return
 
     document = message.document
-    user_context_path = os.path.join(BASE_STORAGE_DIR, str(user_id), current_context)
+    user_documents_path = os.path.join(BASE_STORAGE_DIR, str(user_id), current_context, "documents")
 
-    if not os.path.exists(user_context_path):
-        os.makedirs(user_context_path)
+    if not os.path.exists(user_documents_path):
+        os.makedirs(user_documents_path)
 
     sanitized_filename = document.file_name.replace(' ', '_')
-    document_path = os.path.join(user_context_path, sanitized_filename)
+    document_path = os.path.join(user_documents_path, sanitized_filename)
 
     # Загрузка документа в ФС
     file = await message.bot.get_file(document.file_id)
