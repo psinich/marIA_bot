@@ -6,8 +6,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from aiogram.types import ReplyKeyboardRemove
+
 from keyboards.main_menu import main_menu
+from keyboards.document_menu import document_menu
 
 from config import BASE_STORAGE_DIR, MAX_CONTEXTS
 
@@ -46,14 +48,16 @@ async def save_context_name(message: Message, state: FSMContext):
     context_path = os.path.join(user_dir, context_name)
 
     storage_path = os.path.join(context_path, "storage")
+    txt_path = os.path.join(context_path, "text")
     documents_path = os.path.join(context_path, "documents")
 
     if os.path.exists(context_path):
         await message.answer("Контекст с таким названием уже существует. Попробуйте другое.")
         return
 
-    os.makedirs(storage_path)
-    os.makedirs(documents_path)
+    os.makedirs(storage_path, exist_ok=True)
+    os.makedirs(documents_path, exist_ok=True)
+    os.makedirs(txt_path, exist_ok=True)
     await state.clear()
 
     await message.answer(f"Контекст '{context_name}' создан!", reply_markup=main_menu)
@@ -79,16 +83,7 @@ async def select_context(callback: CallbackQuery, state: FSMContext):
     context_name = callback.data.split("_", 1)[1]
     await state.update_data(current_context=context_name) # сохранение текущего контекста в состоянии
 
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="Задать вопрос")],
-                  [KeyboardButton(text="Загрузить документы")],
-                  [KeyboardButton(text="Удалить документы")],
-                  [KeyboardButton(text="Просмотреть документы")],
-                  [KeyboardButton(text="Меню")]],
-        resize_keyboard=True
-    )
-
-    await callback.message.answer(f"Вы выбрали контекст: {context_name}", reply_markup=keyboard)
+    await callback.message.answer(f"Вы выбрали контекст: {context_name}", reply_markup=document_menu)
 
 # Удаление контекста
 @router.message(F.text.lower() == "🗑 удалить контекст")
